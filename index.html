@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projetos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="icon/favicon.png" type="image/x-icon">
+    <!-- Adicionar o script do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    <header>
+        <h1 class="name-logo"><a class="logo" href="index.html">Links</a></h1>
+    </header>
+    <main>
+        <ul>
+            <li><a href="animes_e_desenhos.html">Animes e Desenhos</a></li>
+            <li><a href="filmes.html">Filmes</a></li>
+            <li><a href="series.html">Séries</a></li>
+            <li><a href="teste2.html">Teste Filme</a></li>
+        </ul>
+
+        <!-- Formulário de Comentários -->
+        <section id="comments-section">
+            <h2>Deixe seu comentário</h2>
+            <form id="comment-form">
+                <textarea id="comment-text" placeholder="Escreva seu comentário aqui..." required></textarea><br>
+                <button type="submit">Enviar</button>
+            </form>
+
+            <!-- Exibição dos Comentários -->
+            <div id="comments-list">
+                <!-- Comentários carregados aparecerão aqui -->
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 - Projetos</p>
+    </footer>
+
+    <script>
+        // Configuração do Supabase
+        const supabaseUrl = 'https://rfobseearydxqhgszlgy.supabase.co';  // Substitua pela URL do seu projeto
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmb2JzZWVhcnlkeHFoZ3N6bGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwNTY0MzEsImV4cCI6MjA1NDYzMjQzMX0.csF5Iv595Bw80vQC0eqoZ2hms-CPhgkkZ3rxL6Itl5Y';  // Substitua pela chave anon
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Função para carregar os comentários do banco de dados
+        async function loadComments() {
+            let { data: comments, error } = await supabase
+                .from('comments')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Erro ao carregar comentários", error);
+                return;
+            }
+
+            const commentsList = document.getElementById('comments-list');
+            commentsList.innerHTML = '';  // Limpar os comentários antigos
+
+            comments.forEach(comment => {
+                const commentDiv = document.createElement('div');
+                commentDiv.classList.add('comment');
+                commentDiv.innerHTML = `<p><strong>${comment.user_id}</strong> disse: <br>${comment.comment}</p><small>${new Date(comment.created_at).toLocaleString()}</small>`;
+                commentsList.appendChild(commentDiv);
+            });
+        }
+
+        // Função para enviar um novo comentário
+        document.getElementById('comment-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const commentText = document.getElementById('comment-text').value;
+
+            if (!commentText) return;
+
+            // Criar um ID único para o usuário (pode ser melhorado para algo mais seguro)
+            const userId = 'user_' + Math.random().toString(36).substr(2, 9);  // Exemplo simples de ID único
+
+            const { data, error } = await supabase
+                .from('comments')
+                .insert([
+                    { user_id: userId, comment: commentText }
+                ]);
+
+            if (error) {
+                console.error("Erro ao salvar o comentário", error);
+            } else {
+                loadComments();  // Recarregar os comentários
+            }
+
+            // Limpar o campo de texto após envio
+            document.getElementById('comment-text').value = '';
+        });
+
+        // Carregar comentários ao iniciar
+        loadComments();
+    </script>
+</body>
+</html>
