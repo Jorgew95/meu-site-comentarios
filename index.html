@@ -48,7 +48,7 @@
 
         // Função para carregar os comentários do banco de dados
        // Função para carregar os comentários do banco de dados
-async function loadComments() {
+       async function loadComments() {
     let { data: comments, error } = await supabase
         .from('comments') // Nome da tabela no banco de dados
         .select('*') // Selecionando todos os campos
@@ -58,6 +58,8 @@ async function loadComments() {
         console.error("Erro ao carregar comentários", error);
         return;
     }
+
+    console.log(comments); // Verifique os dados retornados aqui
 
     // Obtendo o container onde os comentários serão exibidos
     const commentsList = document.getElementById('comments-list');
